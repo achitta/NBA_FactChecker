@@ -3,6 +3,7 @@ from nba_api.stats.static import teams
 from nba_api.stats.endpoints import commonplayerinfo
 from nba_api.stats.endpoints import commonteamroster
 from nba_api.stats.endpoints import leagueleaders
+from nba_api.stats.endpoints import drafthistory
 import json
 
 class nba_data:
@@ -11,16 +12,14 @@ class nba_data:
             player_details = players.find_players_by_full_name(full_name)
             return(player_details[0]['id']) 
         except:
-            print("No player with the given name")
-            return -1
+            raise Exception("No player with the given name")
 
     def getTeamId(self,full_name = "Golden State Warriors"):
         try:
             team_details = teams.find_teams_by_full_name(full_name)
             return(team_details[0]['id'])
         except:
-            print("No team with the given name")
-            return -1
+            raise Exception("No team with the given name")
     # ****************************************************************************************************************
     #Roster Info Functions
     def getRosterFromId(self,my_team_id = "1610612744", my_season = "2018-19"):
@@ -35,8 +34,7 @@ class nba_data:
                 my_players.append(player[3])
             return my_players
         except:
-            print("Team ID is not valid")
-            return -1
+            raise Exception("Team ID not valid")
 
     def getRoster(self, full_name = "Golden State Warriors", season = "2019-20"):
         id = self.getTeamId(full_name)
@@ -96,7 +94,100 @@ class nba_data:
             else :
                 print("")
     # ****************************************************************************************************************
-nba_data = nba_data()
-nba_data.printLeagueLeaderSummary(s_category="FG3A", s_mode="PerGame")
-# nba_data.printLeagueLeaderSingle(s_mode="PerGame")
 
+    # ****************************************************************************************************************
+    # Headline Stats
+    def printHeadlineStats(self,full_name = "Stephen Curry"): 
+        id = self.getPlayerId(full_name)
+        player_info = commonplayerinfo.CommonPlayerInfo(id)
+        headline_stats = player_info.player_headline_stats.get_dict()
+        for i in range(1,6):
+            print(headline_stats['headers'][i] + ": " + str(headline_stats['data'][0][i]))
+    # ****************************************************************************************************************
+
+    # ****************************************************************************************************************
+    # Common Player Info
+    def printCommonPlayerInfo(self,full_name = "Stephen Curry"):
+        id = self.getPlayerId(full_name)
+        player = commonplayerinfo.CommonPlayerInfo(id)
+        common_info = player.common_player_info.get_dict()
+        for i in range(0,30):
+            if(i == 0 or i == 3 or i == 4 or i == 5 or i == 15 or i == 16 or i == 19 or i == 21 or i == 24 or i == 25 or i == 26):
+                continue
+            print(common_info['headers'][i] + ": " + str(common_info['data'][0][i]))
+    # ****************************************************************************************************************
+
+    # ****************************************************************************************************************
+    # Draft Info
+    # 
+    def getDraftClassInfo(self, team_num="", my_pick="", my_round="", ovlpick="", my_college="", league_num = "00", visible_amount = "", my_season = "2019") :
+        info = drafthistory.DraftHistory(league_id="00", topx_nullable=visible_amount, team_id_nullable=team_num, season_year_nullable=my_season, round_pick_nullable=my_pick, round_num_nullable=my_round, overall_pick_nullable=ovlpick, college_nullable=my_college)
+        draft_details = info.get_dict()
+        return draft_details
+
+    def printDraftInfoForPlayer(self, full_name = "Stephen Curry"):
+        id = self.getPlayerId(full_name)
+        player = commonplayerinfo.CommonPlayerInfo(id)
+        common_info = player.common_player_info.get_dict()
+        print("Draft Year: " + str(common_info['data'][0][27]))
+        print("Round Number: " + str(common_info['data'][0][28]))
+        print("Pick Number: " + str(common_info['data'][0][29]))
+        
+    def printDraftClassForGivenSeason(self, season = "2019", show_num = 10):
+        draft_dict = self.getDraftClassInfo(league_num = "00", visible_amount = str(show_num), my_season = season)
+        player_list = draft_dict['resultSets'][0]['rowSet']
+        for players in player_list:
+            print(players[1], end = " - ")
+            print("Round num: " + str(players[3]), end = " | ")
+            print("Pick num: " + str(players[4]), end = " | ")
+            print("Overall: " + str(players[5]), end = " | ")
+            print("Team: " + str(players[10]), end = " | ")
+            print("College: " + str(players[11]))
+
+    def printPlayerFromDraftPick(self, overall = "1", round_n = "", pick_n = "", season = "2019"):
+        draft_dict = self.getDraftClassInfo(my_pick=pick_n, my_round=round_n, ovlpick=overall)
+        player_list = draft_dict['resultSets'][0]['rowSet']  
+        i = 0    
+        print(player_list[i][1])
+        print("Round num: " + str(player_list[i][3]))
+        print("Pick num: " + str(player_list[i][4]))
+        print("Overall: " + str(player_list[i][5]))
+        print("Team: " + str(player_list[i][10]))
+        print("College: " + str(player_list[i][11]))
+
+    def printCollegeDraftStats(self, college_name = "Duke", season = "2019"):
+        draft_dict = self.getDraftClassInfo(my_college=college_name, my_season=season)
+        # print(draft_dict)
+        player_list = draft_dict['resultSets'][0]['rowSet']
+        for players in player_list:
+            print(players[1], end = " - ")
+            print("Round num: " + str(players[3]), end = " | ")
+            print("Pick num: " + str(players[4]), end = " | ")
+            print("Overall: " + str(players[5]), end = " | ")
+            print("Team: " + str(players[10]), end = " | ")
+            print("College: " + str(players[11]))
+
+    def printDraftStatsByTeam(self, team_name = "Golden State Warriors", season = "2019"):
+        id = self.getTeamId(team_name)
+        draft_dict = self.getDraftClassInfo(my_season=season, team_num=id)
+        player_list = draft_dict['resultSets'][0]['rowSet']
+        for players in player_list:
+            print(players[1], end = " - ")
+            print("Round num: " + str(players[3]), end = " | ")
+            print("Pick num: " + str(players[4]), end = " | ")
+            print("Overall: " + str(players[5]), end = " | ")
+            print("Team: " + str(players[10]), end = " | ")
+            print("College: " + str(players[11]))
+
+    # ****************************************************************************************************************
+nba_data = nba_data()
+# nba_data.printLeagueLeaderSummary(s_category="FG3A", s_mode="PerGame")
+# nba_data.printLeagueLeaderSingle(s_mode="PerGame")
+# nba_data.getCommonPlayerInfo("Kevin Durant")
+# print(nba_data.getTeamId())
+# nba_data.getDraftClassInfo()
+# nba_data.printDraftInfoForPlayer("Mo Bamba")
+# nba_data.printPlayerFromDraftPick(overall=3)
+# nba_data.printCollegeDraftStats()
+# nba_data.printDraftClassForGivenSeason(season="2018")
+# nba_data.printDraftStatsByTeam()
