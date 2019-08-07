@@ -22,7 +22,7 @@ print(lebron_stats['data'])
 from nba_api.stats.endpoints import commonteamroster
 import json
 
-roster_info = commonteamroster.CommonTeamRoster(season=2019, team_id = 1610612739)
+roster_info = commonteamroster.CommonTeamRoster(season=2017, team_id = 1610612739)
 roster_cavs = roster_info.get_dict()
 
 with open('nba.json', 'w') as fp:
@@ -34,3 +34,11 @@ c = b['rowSet']
 
 for player in c:
     print(player[3])
+
+from nba_api.stats.endpoints import leagueleaders
+league_info = leagueleaders.LeagueLeaders(league_id="00",per_mode48="PerGame", scope="S", season="2018-19", season_type_all_star="Regular Season", stat_category_abbreviation="PTS")
+print(league_info.get_dict())
+
+with open('nba.json', 'w') as fp:
+    json.dump(league_info.get_dict(), fp, indent=3)
+    
