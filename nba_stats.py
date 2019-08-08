@@ -4,6 +4,9 @@ from nba_api.stats.endpoints import commonplayerinfo
 from nba_api.stats.endpoints import commonteamroster
 from nba_api.stats.endpoints import leagueleaders
 from nba_api.stats.endpoints import drafthistory
+from nba_api.stats.endpoints import scoreboardv2
+from nba_api.stats.endpoints import playerawards
+from datetime import date
 import json
 
 class nba_data:
@@ -180,14 +183,114 @@ class nba_data:
             print("College: " + str(players[11]))
 
     # ****************************************************************************************************************
+
+    # ****************************************************************************************************************
+    # Daily Score Board
+    def getScoreBoard(self, date = "2016-02-27"):
+        scoreBoard = scoreboardv2.ScoreboardV2(game_date=date, league_id="00", day_offset="0").get_dict()
+        with open('scoreboard.json', 'w') as fp:
+            json.dump(scoreBoard, fp, indent=3)
+        return scoreBoard
+
+    def getScoresForDay(self, myDate = "2016-02-27"):
+        dayScores_dict = self.getScoreBoard(date=myDate)
+        scores = dayScores_dict['resultSets'][1]['rowSet']
+        combined = []
+        for score in scores:
+            combined.append([score[4],score[22]])
+        return combined
+
+    def printScoresForDay(self, date = "2016-02-27") :
+        combined = self.getScoresForDay(myDate=date)
+        i = 0
+        with open('scores.txt','w') as fp:
+            print("")   
+
+        while(i < len(combined)) :
+            team1 = combined[i][0]
+            score1 = combined[i][1]
+            team2 = combined[i+1][0]
+            score2 = combined[i+1][1]
+            if(score1 > score2) :
+                print(team1 + " def. " + team2 + " " + str(score1) + "-" + str(score2))
+                with open('scores.txt', 'a') as fp:
+                    fp.write(team1 + " def. " + team2 + " " + str(score1) + "-" + str(score2))
+            else:
+                print(team2 + " def. " + team1 + " " + str(score2) + "-" + str(score1))
+                with open('scores.txt', 'a') as fp:
+                    fp.write(team2 + " def. " + team1 + " " + str(score2) + "-" + str(score1))
+            
+            with open('scores.txt', 'a') as fp:
+                fp.write(" | ")
+            i = i + 2
+
+    def read_func(self):
+        today = date.today()
+        print(today)
+
+    
+            
+
+    # ****************************************************************************************************************
+
+    # ****************************************************************************************************************
+    #Player Awards
+    def getPlayerAwards(self, id = "201939"):
+        awards_dict = playerawards.PlayerAwards(player_id = id).get_dict()
+        return awards_dict
+
+    def printPlayerAward(self, name = "Stephen Curry"):
+        my_id = self.getPlayerId(full_name=name)
+        awards_dict = self.getPlayerAwards(id=my_id)
+        # print(awards_dict)
+        with open('awards.json', 'w') as fp:
+            json.dump(awards_dict, fp, indent=3)
+
+        awards = awards_dict['resultSets'][0]['rowSet']
+
+        for award in awards:
+            name = award[4]
+            if(name.find("of the Week") != -1 or name.find("of the Month") != -1):
+                continue
+            print(name, end=" ")
+            if(award[5] == None) :
+                print("")
+            else:
+                print(award[5])
+    # ****************************************************************************************************************
 nba_data = nba_data()
 # nba_data.printLeagueLeaderSummary(s_category="FG3A", s_mode="PerGame")
 # nba_data.printLeagueLeaderSingle(s_mode="PerGame")
-# nba_data.getCommonPlayerInfo("Kevin Durant")
+# nba_data.printCommonPlayerInfo("Kevin Durant")
 # print(nba_data.getTeamId())
 # nba_data.getDraftClassInfo()
-# nba_data.printDraftInfoForPlayer("Mo Bamba")
+# nba_data.printDraftInfoForPlayer("Greg Oden")
 # nba_data.printPlayerFromDraftPick(overall=3)
 # nba_data.printCollegeDraftStats()
 # nba_data.printDraftClassForGivenSeason(season="2018")
 # nba_data.printDraftStatsByTeam()
+# nba_data.printScoresForDay(date="2016-02-27")
+# nba_data.printPlayerAward(name="Stephen Curry")
+nba_data.read_func()
+
+###USER FUNCTIONS
+
+##Roster
+#printRoster()
+
+##League Leader
+#printLeagueLeaderSingle()
+#printLeagueLeaderSummary()
+
+##Headline Stats
+#printHeadlineStats()
+
+##Common Player Info
+#printCommonPlayerInfo()
+
+##Draft Info
+#printDraftInfoForPlayer()
+#printDraftClassForGivenSeason()
+#printPlayerFromDraftPick()
+#printCollegeDraftStats()
+#printDraftStatsByTeam()
