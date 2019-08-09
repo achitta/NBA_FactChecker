@@ -7,6 +7,7 @@ from nba_api.stats.endpoints import drafthistory
 from nba_api.stats.endpoints import scoreboardv2
 from nba_api.stats.endpoints import playerawards
 from datetime import date
+from datetime import timedelta
 import json
 
 class nba_data:
@@ -104,8 +105,12 @@ class nba_data:
         id = self.getPlayerId(full_name)
         player_info = commonplayerinfo.CommonPlayerInfo(id)
         headline_stats = player_info.player_headline_stats.get_dict()
+        with open('headline_stats.txt', 'w') as fp:
+            fp.write("")
         for i in range(1,6):
             print(headline_stats['headers'][i] + ": " + str(headline_stats['data'][0][i]))
+            with open('headline_stats.txt', 'a') as fp:
+                fp.write(headline_stats['headers'][i] + ": " + str(headline_stats['data'][0][i]) + " | ")
     # ****************************************************************************************************************
 
     # ****************************************************************************************************************
@@ -224,9 +229,39 @@ class nba_data:
                 fp.write(" | ")
             i = i + 2
 
-    def read_func(self):
-        today = date.today()
-        print(today)
+        
+    def printScoresForYesterday(self) :
+        yesterday = self.getYesterday()
+        combined = self.getScoresForDay(myDate=yesterday)
+        i = 0
+        with open('scores.txt','w') as fp:
+            print("", end = "")   
+        
+        if(len(combined) == 0) :
+            with open('scores.txt', 'a') as fp:
+                fp.write("No games played yesterday")
+
+        while(i < len(combined)) :
+            team1 = combined[i][0]
+            score1 = combined[i][1]
+            team2 = combined[i+1][0]
+            score2 = combined[i+1][1]
+            if(score1 > score2) :
+                print(team1 + " def. " + team2 + " " + str(score1) + "-" + str(score2))
+                with open('scores.txt', 'a') as fp:
+                    fp.write(team1 + " def. " + team2 + " " + str(score1) + "-" + str(score2))
+            else:
+                print(team2 + " def. " + team1 + " " + str(score2) + "-" + str(score1))
+                with open('scores.txt', 'a') as fp:
+                    fp.write(team2 + " def. " + team1 + " " + str(score2) + "-" + str(score1))
+            
+            with open('scores.txt', 'a') as fp:
+                fp.write(" | ")
+            i = i + 2
+
+    def getYesterday(self):
+        yesterday = date.strftime(date.today() - timedelta(1), '%Y-%m-%d')
+        return (str(yesterday))
 
     
             
@@ -258,7 +293,7 @@ class nba_data:
             else:
                 print(award[5])
     # ****************************************************************************************************************
-nba_data = nba_data()
+# nba_obj = nba_data()
 # nba_data.printLeagueLeaderSummary(s_category="FG3A", s_mode="PerGame")
 # nba_data.printLeagueLeaderSingle(s_mode="PerGame")
 # nba_data.printCommonPlayerInfo("Kevin Durant")
@@ -271,7 +306,8 @@ nba_data = nba_data()
 # nba_data.printDraftStatsByTeam()
 # nba_data.printScoresForDay(date="2016-02-27")
 # nba_data.printPlayerAward(name="Stephen Curry")
-nba_data.read_func()
+# nba_data.printScoresForYesterday()
+# nba_data.printHeadlineStats()
 
 ###USER FUNCTIONS
 

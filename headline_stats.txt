@@ -1,0 +1,1 @@
+PLAYER_NAME: Kevin Durant | TimeFrame: 2018-19 | PTS: 26.0 | AST: 5.9 | REB: 6.4 | 
