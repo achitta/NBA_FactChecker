@@ -6,6 +6,7 @@ from nba_api.stats.endpoints import leagueleaders
 from nba_api.stats.endpoints import drafthistory
 from nba_api.stats.endpoints import scoreboardv2
 from nba_api.stats.endpoints import playerawards
+from nba_api.stats.endpoints import playerfantasyprofile
 from datetime import date
 from datetime import timedelta
 import json
@@ -293,6 +294,43 @@ class nba_data:
             else:
                 print(award[5])
     # ****************************************************************************************************************
+
+    # ****************************************************************************************************************
+    # Fantasy Profile
+    def getFantasyProfileDict(self, mode = "PerGame",type_season = "Regular Season", id = "201939"):
+        fantasy_obj = playerfantasyprofile.PlayerFantasyProfile(player_id=id, measure_type_base="Base", pace_adjust_no="N", per_mode36=mode, plus_minus_no="N", rank_no="N", season="2018-19", season_type_playoffs=type_season, league_id_nullable="00")
+        fantasy_dict = fantasy_obj.get_dict()
+        with open('season_stats.json', 'w') as fp:
+            json.dump(fantasy_dict, fp, indent=3)
+        return fantasy_dict
+
+    def printSeasonStats(self, my_mode = "PerGame", season = "Regular Season", my_name = "Stephen Curry") :
+        with open('season_stats.txt', 'w') as fp:
+            print("", end = "")
+        my_id = self.getPlayerId(my_name)
+        profile_dict = self.getFantasyProfileDict(mode = my_mode, type_season=season, id= my_id)
+        my_headers = profile_dict['resultSets'][0]['headers']
+        pts_idx = self.getArrayIndexHeader(col_name="PTS", stat_mode="PerGame", headers = my_headers)
+        ast_idx = self.getArrayIndexHeader(col_name="AST", stat_mode="PerGame", headers = my_headers)
+        reb_idx = self.getArrayIndexHeader(col_name="REB", stat_mode="PerGame", headers = my_headers)
+        fg_idx = self.getArrayIndexHeader(col_name = "FG_PCT", stat_mode = "PerGame", headers = my_headers)
+        three_idx = self.getArrayIndexHeader(col_name = "FG3_PCT", stat_mode = "PerGame", headers = my_headers)
+        ft_idx = self.getArrayIndexHeader(col_name = "FT_PCT", stat_mode = "PerGame", headers = my_headers)
+        results = profile_dict['resultSets'][0]['rowSet'][0]
+        print("PTS: " + str(results[pts_idx]), end = " | ")
+        print("AST: " + str(results[ast_idx]), end = " | ")
+        print("REB: " + str(results[reb_idx]), end = " | ")
+        print("FG%: " + str(round(results[fg_idx] * 100,2)) + "%", end = " | ")
+        print("3pt%: " + str(round(results[three_idx] * 100,2)) + "%", end = " | ")
+        print("FT%: " + str(round(results[ft_idx] * 100,2)) + "%")
+        with open('season_stats.txt', 'a') as fp:
+            fp.write("PTS: " + str(results[pts_idx]) + " | ")
+            fp.write("AST: " + str(results[ast_idx])+ " | ")
+            fp.write("REB: " + str(results[reb_idx])+" | ")
+            fp.write("FG%: " + str(round(results[fg_idx] * 100,2)) + "%"+ " | ")
+            fp.write("3pt%: " + str(round(results[three_idx] * 100,2)) + "%"+" | ")
+            fp.write("FT%: " + str(round(results[ft_idx] * 100,2)) + "%")
+    # ****************************************************************************************************************
 # nba_obj = nba_data()
 # nba_data.printLeagueLeaderSummary(s_category="FG3A", s_mode="PerGame")
 # nba_data.printLeagueLeaderSingle(s_mode="PerGame")
@@ -308,7 +346,7 @@ class nba_data:
 # nba_data.printPlayerAward(name="Stephen Curry")
 # nba_data.printScoresForYesterday()
 # nba_data.printHeadlineStats()
-
+# nba_obj.printSeasonStats()
 ###USER FUNCTIONS
 
 ##Roster
