@@ -7,6 +7,7 @@ from nba_api.stats.endpoints import drafthistory
 from nba_api.stats.endpoints import scoreboardv2
 from nba_api.stats.endpoints import playerawards
 from nba_api.stats.endpoints import playerfantasyprofile
+from nba_api.stats.endpoints import playerprofilev2
 from datetime import date
 from datetime import timedelta
 import json
@@ -48,8 +49,14 @@ class nba_data:
 
     def printRoster(self, full_name = "Golden State Warriors", season = "2019-20"):
         players = self.getRoster(full_name, season)
+        with open('roster.txt','w') as fp:
+            print("", end = "") 
+
         for player in players:
-            print(player)
+            # print(player)
+            with open('roster.txt', 'a') as fp:
+                fp.write(player + '\n')
+
     
     # ****************************************************************************************************************
 
@@ -120,10 +127,14 @@ class nba_data:
         id = self.getPlayerId(full_name)
         player = commonplayerinfo.CommonPlayerInfo(id)
         common_info = player.common_player_info.get_dict()
+        with open('general.txt', 'w') as fp:
+            fp.write("")
         for i in range(0,30):
             if(i == 0 or i == 3 or i == 4 or i == 5 or i == 15 or i == 16 or i == 19 or i == 21 or i == 24 or i == 25 or i == 26):
                 continue
             print(common_info['headers'][i] + ": " + str(common_info['data'][0][i]))
+            with open('general.txt', 'a') as fp:
+                fp.write(common_info['headers'][i] + ": " + str(common_info['data'][0][i]) + '\n')
     # ****************************************************************************************************************
 
     # ****************************************************************************************************************
@@ -136,15 +147,23 @@ class nba_data:
 
     def printDraftInfoForPlayer(self, full_name = "Stephen Curry"):
         id = self.getPlayerId(full_name)
+        with open('draft_player.txt', 'w') as fp:
+            fp.write("")
         player = commonplayerinfo.CommonPlayerInfo(id)
         common_info = player.common_player_info.get_dict()
         print("Draft Year: " + str(common_info['data'][0][27]))
         print("Round Number: " + str(common_info['data'][0][28]))
         print("Pick Number: " + str(common_info['data'][0][29]))
+        with open('draft_player.txt', 'a') as fp:
+            fp.write("Draft Year: " + str(common_info['data'][0][27]) + '\n')
+            fp.write("Round Number: " + str(common_info['data'][0][28]) + '\n')
+            fp.write("Pick Number: " + str(common_info['data'][0][29]) + '\n')
         
     def printDraftClassForGivenSeason(self, season = "2019", show_num = 10):
         draft_dict = self.getDraftClassInfo(league_num = "00", visible_amount = str(show_num), my_season = season)
         player_list = draft_dict['resultSets'][0]['rowSet']
+        with open('general.txt', 'w') as fp:
+            fp.write("")
         for players in player_list:
             print(players[1], end = " - ")
             print("Round num: " + str(players[3]), end = " | ")
@@ -152,6 +171,14 @@ class nba_data:
             print("Overall: " + str(players[5]), end = " | ")
             print("Team: " + str(players[10]), end = " | ")
             print("College: " + str(players[11]))
+            with open('general.txt', 'a') as fp:
+                fp.write("Player Name: " + players[1] + '\n')
+                fp.write("Round num: " + str(players[3]) + '\n')
+                fp.write("Pick Number: " + str(players[4]) + '\n')
+                fp.write("Overall: " + str(players[5]) + '\n')
+                fp.write("Team: " + str(players[10]) + '\n')
+                fp.write("College: " + str(players[11]) + '\n')
+                fp.write('\n')
 
     def printPlayerFromDraftPick(self, overall = "1", round_n = "", pick_n = "", season = "2019"):
         draft_dict = self.getDraftClassInfo(my_pick=pick_n, my_round=round_n, ovlpick=overall)
@@ -167,6 +194,8 @@ class nba_data:
     def printCollegeDraftStats(self, college_name = "Duke", season = "2019"):
         draft_dict = self.getDraftClassInfo(my_college=college_name, my_season=season)
         # print(draft_dict)
+        with open('general.txt', 'w') as fp:
+            fp.write("")
         player_list = draft_dict['resultSets'][0]['rowSet']
         for players in player_list:
             print(players[1], end = " - ")
@@ -176,10 +205,21 @@ class nba_data:
             print("Team: " + str(players[10]), end = " | ")
             print("College: " + str(players[11]))
 
+            with open('general.txt', 'a') as fp:
+                fp.write("Player Name: " + players[1] + '\n')
+                fp.write("Round num: " + str(players[3])+'\n')
+                fp.write("Pick num: " + str(players[4])+'\n')
+                fp.write("Overall: " + str(players[5])+'\n')
+                fp.write("Team: " + str(players[10])+'\n')
+                fp.write("College: " + str(players[11]) + '\n')
+                fp.write('\n')
+
     def printDraftStatsByTeam(self, team_name = "Golden State Warriors", season = "2019"):
         id = self.getTeamId(team_name)
         draft_dict = self.getDraftClassInfo(my_season=season, team_num=id)
         player_list = draft_dict['resultSets'][0]['rowSet']
+        with open('general.txt', 'w') as fp:
+            fp.write("")
         for players in player_list:
             print(players[1], end = " - ")
             print("Round num: " + str(players[3]), end = " | ")
@@ -187,6 +227,15 @@ class nba_data:
             print("Overall: " + str(players[5]), end = " | ")
             print("Team: " + str(players[10]), end = " | ")
             print("College: " + str(players[11]))
+
+            with open('general.txt', 'a') as fp:
+                fp.write("Player Name: " + players[1] + '\n')
+                fp.write("Round num: " + str(players[3])+'\n')
+                fp.write("Pick num: " + str(players[4])+'\n')
+                fp.write("Overall: " + str(players[5])+'\n')
+                fp.write("Team: " + str(players[10])+'\n')
+                fp.write("College: " + str(players[11]) + '\n')
+                fp.write('\n')
 
     # ****************************************************************************************************************
 
@@ -283,32 +332,39 @@ class nba_data:
             json.dump(awards_dict, fp, indent=3)
 
         awards = awards_dict['resultSets'][0]['rowSet']
-
+        with open('awards.txt', 'w') as fp:
+            print("", end = "")
+        my_dict = {}
         for award in awards:
             name = award[4]
-            if(name.find("of the Week") != -1 or name.find("of the Month") != -1):
-                continue
-            print(name, end=" ")
-            if(award[5] == None) :
-                print("")
+            if(award[5] != None) :
+                name += (" " + str(award[5]))
+            
+            if (name in my_dict) :
+                my_dict[name] += 1
             else:
-                print(award[5])
+                my_dict[name] = 1
+
+        for x,y in my_dict.items():
+            with open('awards.txt', 'a') as fp:
+                fp.write(str(y) + "x " + x + "\n")
+                print(str(y) + "x " + x + "\n")
     # ****************************************************************************************************************
 
     # ****************************************************************************************************************
     # Fantasy Profile
-    def getFantasyProfileDict(self, mode = "PerGame",type_season = "Regular Season", id = "201939"):
-        fantasy_obj = playerfantasyprofile.PlayerFantasyProfile(player_id=id, measure_type_base="Base", pace_adjust_no="N", per_mode36=mode, plus_minus_no="N", rank_no="N", season="2018-19", season_type_playoffs=type_season, league_id_nullable="00")
+    def getFantasyProfileDict(self, mode = "PerGame",type_season = "Regular Season", id = "201939", my_season = "2018-19"):
+        fantasy_obj = playerfantasyprofile.PlayerFantasyProfile(player_id=id, measure_type_base="Base", pace_adjust_no="N", per_mode36=mode, plus_minus_no="N", rank_no="N", season=my_season, season_type_playoffs=type_season, league_id_nullable="00")
         fantasy_dict = fantasy_obj.get_dict()
         with open('season_stats.json', 'w') as fp:
             json.dump(fantasy_dict, fp, indent=3)
         return fantasy_dict
 
-    def printSeasonStats(self, my_mode = "PerGame", season = "Regular Season", my_name = "Stephen Curry") :
+    def printSeasonStats(self, my_mode = "PerGame", season = "Regular Season", my_name = "Stephen Curry", year = "2018-19") :
         with open('season_stats.txt', 'w') as fp:
             print("", end = "")
         my_id = self.getPlayerId(my_name)
-        profile_dict = self.getFantasyProfileDict(mode = my_mode, type_season=season, id= my_id)
+        profile_dict = self.getFantasyProfileDict(mode = my_mode, type_season=season, id= my_id, my_season=year)
         my_headers = profile_dict['resultSets'][0]['headers']
         pts_idx = self.getArrayIndexHeader(col_name="PTS", stat_mode="PerGame", headers = my_headers)
         ast_idx = self.getArrayIndexHeader(col_name="AST", stat_mode="PerGame", headers = my_headers)
@@ -330,8 +386,42 @@ class nba_data:
             fp.write("FG%: " + str(round(results[fg_idx] * 100,2)) + "%"+ " | ")
             fp.write("3pt%: " + str(round(results[three_idx] * 100,2)) + "%"+" | ")
             fp.write("FT%: " + str(round(results[ft_idx] * 100,2)) + "%")
+
+    def getPlayerProfileDict(self, mode = "PerGame", player_name = "Stephen Curry") :
+        id = self.getPlayerId(full_name=player_name)
+        profile_dict = playerprofilev2.PlayerProfileV2(per_mode36=mode, player_id=id).get_dict()
+        with open('career_stats.json', 'w') as fp:
+            json.dump(profile_dict, fp, indent=3)
+        return profile_dict
+
+    def printCareerStats(self, my_mode = "PerGame", name = "Stephen Curry"):
+        profile_dict = self.getPlayerProfileDict(mode= my_mode, player_name=name)
+        with open('career_stats.txt', 'w') as fp:
+            print("", end = "")
+        headers = profile_dict['resultSets'][1]['headers']
+        results = profile_dict['resultSets'][1]['rowSet'][0]
+        pts_idx = self.getArrayIndexHeader(col_name="PTS", stat_mode="PerGame", headers = headers)
+        ast_idx = self.getArrayIndexHeader(col_name="AST", stat_mode="PerGame", headers = headers)
+        reb_idx = self.getArrayIndexHeader(col_name="REB", stat_mode="PerGame", headers = headers)
+        fg_idx = self.getArrayIndexHeader(col_name = "FG_PCT", stat_mode = "PerGame", headers = headers)
+        three_idx = self.getArrayIndexHeader(col_name = "FG3_PCT", stat_mode = "PerGame", headers = headers)
+        ft_idx = self.getArrayIndexHeader(col_name = "FT_PCT", stat_mode = "PerGame", headers = headers)
+        print("PTS: " + str(results[pts_idx]), end = " | ")
+        print("AST: " + str(results[ast_idx]), end = " | ")
+        print("REB: " + str(results[reb_idx]), end = " | ")
+        print("FG%: " + str(round(results[fg_idx] * 100,2)) + "%", end = " | ")
+        print("3pt%: " + str(round(results[three_idx] * 100,2)) + "%", end = " | ")
+        print("FT%: " + str(round(results[ft_idx] * 100,2)) + "%")
+        with open('career_stats.txt', 'a') as fp:
+            fp.write("PTS: " + str(results[pts_idx]) + " | ")
+            fp.write("AST: " + str(results[ast_idx])+ " | ")
+            fp.write("REB: " + str(results[reb_idx])+" | ")
+            fp.write("FG%: " + str(round(results[fg_idx] * 100,2)) + "%"+ " | ")
+            fp.write("3pt%: " + str(round(results[three_idx] * 100,2)) + "%"+" | ")
+            fp.write("FT%: " + str(round(results[ft_idx] * 100,2)) + "%")
+        
     # ****************************************************************************************************************
-# nba_obj = nba_data()
+nba_obj = nba_data()
 # nba_data.printLeagueLeaderSummary(s_category="FG3A", s_mode="PerGame")
 # nba_data.printLeagueLeaderSingle(s_mode="PerGame")
 # nba_data.printCommonPlayerInfo("Kevin Durant")
@@ -343,10 +433,11 @@ class nba_data:
 # nba_data.printDraftClassForGivenSeason(season="2018")
 # nba_data.printDraftStatsByTeam()
 # nba_data.printScoresForDay(date="2016-02-27")
-# nba_data.printPlayerAward(name="Stephen Curry")
+nba_obj.printPlayerAward(name="Stephen Curry")
 # nba_data.printScoresForYesterday()
 # nba_data.printHeadlineStats()
 # nba_obj.printSeasonStats()
+# nba_obj.printCareerStats()
 ###USER FUNCTIONS
 
 ##Roster

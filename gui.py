@@ -1,4 +1,6 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
+from nba_stats import nba_data
+
 font_but = QtGui.QFont()
 font_but.setFamily("Segoe UI Symbol")
 font_but.setPointSize(10)
@@ -37,6 +39,7 @@ class PyQtApp(QtWidgets.QWidget):
     
     def __init__(self, parent=None):
         QtWidgets.QWidget.__init__(self, parent)
+        self.nba_obj = nba_data()
         self.setWindowTitle("NBA Twilio Application")
         self.setWindowIcon(QtGui.QIcon("Your/image/file.png"))
         self.setMinimumWidth(resolution.width())
@@ -193,11 +196,16 @@ class PyQtApp(QtWidgets.QWidget):
         self.output.setStyleSheet("""margin: 1px; padding: 1px;
                                     background-color:      
                                     rgba(255,255,255,1);
-                                    color: rgba(1,140,0,100);
+                                    color: rgba(0,0,0,1);
                                     border-style: solid;
                                     border-radius: 3px;
                                     border-width: 0.5px;
                                     border-color: rgba(0,0,0,1);""")
+
+    def clear_all(self):
+        self.query_box.clear()
+        self.mode.clear()
+        self.season.clear()
 
     def subscribe_func(self):
         new_number = str(self.phone_num.toPlainText())
@@ -206,31 +214,149 @@ class PyQtApp(QtWidgets.QWidget):
         self.phone_num.clear()
 
     def career_stats_func(self):
-        return 0
+        player_name = str(self.query_box.toPlainText())
+        mode = str(self.mode.toPlainText())
+        if (player_name == ""):
+            player_name = "Stephen Curry"
+        if (mode == ""):
+            mode = "PerGame"
+        try:
+            self.nba_obj.printCareerStats(my_mode=mode, name=player_name)
+            career_file = open('career_stats.txt', 'r')
+            career_stats = career_file.read()
+            self.output.setText(player_name + "\n\n" + career_stats)
+            self.clear_all()
+        except:
+            self.output.setText("Player/Season/Mode not found")
+            self.clear_all()
 
     def season_stats_func(self):
-        return 0
+        player_name = str(self.query_box.toPlainText())
+        my_season = str(self.season.toPlainText())
+        mode = str(self.mode.toPlainText())
+        if(player_name == ""):
+            player_name = "Stephen Curry"
+        if(my_season == ""):
+            my_season = "2018-19"
+        if(mode == ""):
+            mode = "PerGame"
+        try:
+            self.nba_obj.printSeasonStats(my_mode=mode, my_name=player_name, year=my_season)
+            season_file = open('season_stats.txt', 'r')
+            season_stats = season_file.read()
+            self.output.setText(player_name + " - " + my_season  + "\n\n" + season_stats)
+            self.clear_all()
+        except:
+            self.output.setText("Player/Season/Mode not found")
+            self.clear_all()
 
     def player_awards_func(self):
-        return 0
+        player_name = str(self.query_box.toPlainText())
+        if (player_name == ""):
+            player_name = "Stephen Curry"
+        try:
+            self.nba_obj.printPlayerAward(name = player_name)
+            award_file = open('awards.txt', 'r')
+            awards = award_file.read()
+            self.output.setText(player_name + "\n\n" + awards)
+            self.clear_all()
+        except:
+            self.output.setText("Player/Season/Mode not found")
+            self.clear_all()
     
     def roster_func(self):
-        return 0
+        team_name = str(self.query_box.toPlainText())
+        season = str(self.season.toPlainText())
+        if (team_name == ""):
+            team_name = "Golden State Warriors"
+        if (season == ""):
+            season = "2019-20"
+        try:
+            self.nba_obj.printRoster(full_name=team_name, season=season)
+            roster_file = open('roster.txt', 'r')
+            roster = roster_file.read()
+            self.output.setText(team_name + "\n\n" + roster)
+            self.clear_all()
+        except:
+            self.output.setText("Player/Season/Mode not found")
+            self.clear_all()
 
     def draft_info_player_func(self):
-        return 0
+        player_name = str(self.query_box.toPlainText())
+        if (player_name == ""):
+            player_name = "Stephen Curry"
+
+        try:
+            self.nba_obj.printDraftInfoForPlayer(full_name=player_name)
+            draft_file = open('draft_player.txt', 'r')
+            draft = draft_file.read()
+            self.output.setText(player_name + "\n\n" + draft)
+            self.clear_all()
+        except:
+            self.output.setText("Player/Season/Mode not found")
+            self.clear_all()
 
     def draft_college_func(self):
-        return 0
+        player_name = str(self.query_box.toPlainText())
+        my_season = str(self.season.toPlainText())
+        if (player_name == ""):
+            player_name = "Duke"
+        if (my_season == ""):
+            my_season = "2019"
+        try:
+            self.nba_obj.printCollegeDraftStats(college_name=player_name, season= my_season)
+            draft_file = open('general.txt', 'r')
+            draft = draft_file.read()
+            self.output.setText(player_name + "\n\n" + draft)
+            self.clear_all()
+        except:
+            self.output.setText("Player/Season/Mode not found")
+            self.clear_all()
 
     def draft_team_func(self):
-        return 0
+        player_name = str(self.query_box.toPlainText())
+        my_season = str(self.season.toPlainText())
+        if (player_name == ""):
+            player_name = "Golden State Warriors"
+        if (my_season == ""):
+            my_season = "2019"
+        try:
+            self.nba_obj.printDraftStatsByTeam(team_name=player_name, season=my_season)
+            draft_file = open('general.txt', 'r')
+            draft = draft_file.read()
+            self.output.setText(player_name + " - " + my_season + "\n\n" + draft)
+            self.clear_all()
+        except:
+            self.output.setText("Player/Season/Mode not found")
+            self.clear_all()
 
     def draft_class_func(self):
-        return 0
+        my_season = str(self.season.toPlainText())
+        if (my_season == ""):
+            my_season = "2019"
+        try:
+            self.nba_obj.printDraftClassForGivenSeason(season = my_season)
+            draft_file = open('general.txt', 'r')
+            draft = draft_file.read()
+            self.output.setText(my_season + "\n\n" + draft)
+            self.clear_all()
+        except:
+            self.output.setText("Player/Season/Mode not found")
+            self.clear_all()
 
     def common_player_info_func(self):
-        return 0
+        player = str(self.query_box.toPlainText())
+        if (player == ""):
+            player = "Stephen Curry"
+        try:
+            self.nba_obj.printCommonPlayerInfo(full_name=player)
+            draft_file = open('general.txt', 'r')
+            draft = draft_file.read()
+            self.output.setText(player + "\n\n" + draft)
+            self.clear_all()
+        except:
+            self.output.setText("Player/Season/Mode not found")
+            self.clear_all()
 
 if __name__ == "__main__":
     import sys
