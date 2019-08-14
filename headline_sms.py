@@ -9,6 +9,8 @@ app = Flask(__name__)
 def sms_ahoy_reply():
     # """Respond to incoming messages with a friendly SMS."""
     incoming = request.values.get('Body', None)
+    if(incoming == "") :
+        return "Hello World! No message to process at the time"
     print(incoming)   
 
     message_body = ""
