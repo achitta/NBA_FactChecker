@@ -433,11 +433,11 @@ nba_obj = nba_data()
 # nba_data.printDraftClassForGivenSeason(season="2018")
 # nba_data.printDraftStatsByTeam()
 # nba_data.printScoresForDay(date="2016-02-27")
-nba_obj.printPlayerAward(name="Stephen Curry")
+# nba_obj.printPlayerAward(name="Stephen Curry")
 # nba_data.printScoresForYesterday()
 # nba_data.printHeadlineStats()
 # nba_obj.printSeasonStats()
-# nba_obj.printCareerStats()
+nba_obj.printCareerStats()
 ###USER FUNCTIONS
 
 ##Roster
